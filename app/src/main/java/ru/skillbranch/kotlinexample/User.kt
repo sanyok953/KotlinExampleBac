@@ -1,5 +1,6 @@
 package ru.skillbranch.kotlinexample
 
+import android.annotation.SuppressLint
 import androidx.annotation.VisibleForTesting
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -27,11 +28,25 @@ class User private constructor (
     private var phone: String? = null
     set(value) {
         // В приходящем value которое приходит в сетер, удаляем все элементы кроме чисел + оставляем
-        field = value?.replace("[^+\\d]".toRegex(), "")
+        val tel: String? = value?.replace("[^+\\d]".toRegex(), "")
+        val plus :String? = value?.let {
+            Regex(pattern = """\+""")
+                .find(input = it)?.value
+        }
+
+        println("T $tel ${tel?.length}")
+
+        if (plus != null && plus.length == 1 && tel != null && tel.length == 12) {
+            field = tel
+        } else {
+            throw IllegalArgumentException("Enter a valid phone number starting with a + and containing 11 digits")
+        }
     }
 
     private var _login: String? = null
+
     var login: String
+        @SuppressLint("DefaultLocale")
         set(value) {
             _login = value?.toLowerCase()
         }
