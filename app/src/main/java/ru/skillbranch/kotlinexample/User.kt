@@ -27,20 +27,7 @@ class User private constructor (
 
     private var phone: String? = null
     set(value) {
-        // В приходящем value которое приходит в сетер, удаляем все элементы кроме чисел + оставляем
-        val tel: String? = value?.replace("[^+\\d]".toRegex(), "")
-        val plus :String? = value?.let {
-            Regex(pattern = """\+""")
-                .find(input = it)?.value
-        }
-
-        println("T $tel ${tel?.length}")
-
-        if (plus != null && plus.length == 1 && tel != null && tel.length == 12) {
-            field = tel
-        } else {
-            throw IllegalArgumentException("Enter a valid phone number starting with a + and containing 11 digits")
-        }
+        field = checkPhone(value)
     }
 
     private var _login: String? = null
@@ -106,9 +93,36 @@ class User private constructor (
 
     fun checkPassword(pass: String) = encrypt(pass) == passwordHash
 
+
+    fun requestAccessCode(){
+        val code = generteAccessCode()
+        passwordHash = encrypt(code)
+        accessCode = code
+        sendAccessCodeToUser(phone!!, code)
+    }
+
     fun changePassword(oldPass: String, newPass: String) {
         if (checkPassword(oldPass)) passwordHash = encrypt(newPass)
         else throw IllegalArgumentException("Password doesnt match the current password")
+    }
+
+    private fun checkPhone(phone: String?): String? {
+        // В приходящем value которое приходит в сетер, удаляем все элементы кроме чисел + оставляем
+        val tel: String? = phone?.replace("[^+\\d]".toRegex(), "")
+        val plus :String? = phone?.let {
+            Regex(pattern = """\+""")
+                .find(input = it)?.value
+        }
+
+        //println("T $tel ${tel?.length}")
+
+        if (plus != null && plus.length == 1 && tel != null && tel.length == 12) {
+            return tel
+        } else {
+            if (phone != null)
+                throw IllegalArgumentException("Enter a valid phone number starting with a + and containing 11 digits")
+        }
+        return null
     }
 
     private fun encrypt(password: String): String = salt.plus(password).md5()
@@ -163,5 +177,6 @@ class User private constructor (
                     }
                 }
         }
+
     }
 }

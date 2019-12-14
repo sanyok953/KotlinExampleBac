@@ -1,5 +1,7 @@
 package ru.skillbranch.kotlinexample
 
+import androidx.annotation.VisibleForTesting
+
 object UserHolder {
     private val map = mutableMapOf<String, User>()
 
@@ -33,14 +35,42 @@ object UserHolder {
     }
 
     fun loginUser(login: String, password: String): String? {
-        return map[login.trim()]?.run {
+        var log:String = login
+
+        val plus :String? = login?.let {
+            Regex(pattern = """\+""")
+                .find(input = it)?.value
+        }
+        if (plus != null && plus.length == 1) {
+            log = login.replace("[^+\\d]".toRegex(), "")
+        }
+
+        return map[log.trim()]?.run {
             if (checkPassword(password)) this.userInfo
             else null
         }
     }
 
-    fun requestAccessCode(phone: String?): String {
-        return ""
+    fun requestAccessCode(login: String) : Unit {
+        var log:String = login
+
+        val plus :String? = login?.let {
+            Regex(pattern = """\+""")
+                .find(input = it)?.value
+        }
+        if (plus != null && plus.length == 1) {
+            log = login.replace("[^+\\d]".toRegex(), "")
+        }
+
+
+        val user = map[log]
+        user?:throw IllegalArgumentException("Unregistred phone number")
+        user.requestAccessCode()
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    fun clearHolder(){
+        map.clear()
     }
 
 }

@@ -1,5 +1,6 @@
 package ru.skillbranch.kotlinexample
 
+import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 
@@ -11,6 +12,20 @@ import org.junit.Assert.*
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class ExampleUnitTest {
+    /**
+    Добавьте метод в UserHolder для очистки значений UserHolder после выполнения каждого теста,
+    это необходимо чтобы тесты можно было запускать одновременно
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    fun clearHolder(){
+    map.clear()
+    }
+     */
+    @After
+    fun after(){
+        UserHolder.clearHolder()
+    }
+
     @Test
     fun register_user_success() {
         val holder = UserHolder
@@ -77,7 +92,7 @@ class ExampleUnitTest {
     @Test(expected = IllegalArgumentException::class)
     fun register_user_by_phone_fail_illegal_name() {
         val holder = UserHolder
-        holder.registerUserByPhone("John Jr Doe", "+7 (XXX) XX XX-XX")
+        holder.registerUserByPhone("John Doe", "+7 (XXX) XX XX-XX")
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -114,12 +129,12 @@ class ExampleUnitTest {
         val expectedInfo = """
             firstName: John
             lastName: Doe
-            login: john_doe@unknown.com
+            login: +79179711111
             fullName: John Doe
             initials: J D
-            email: John_Doe@unknown.com
-            phone: null
-            meta: {auth=password}
+            email: null
+            phone: +79179711111
+            meta: {auth=sms}
         """.trimIndent()
 
         val successResult =  holder.loginUser("+7 (917) 971-11-11", user.accessCode!!)
